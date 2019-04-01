@@ -106,7 +106,9 @@ for item in train_list_per:
     # zz=plt.imshow(img)
     # plt.show()
 
-    img=misc.imresize(img,[512,512]).astype(float)
+    min_length = max((min(img.shape[0], img.shape[1])//512)*512, 512)
+    img=misc.imresize(img,[min_length,min_length]).astype(float)
+    print(img.shape)
 
     haze_image=img
     gt_img=img

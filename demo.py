@@ -138,7 +138,7 @@ print(index_list.iloc[0][0].split('/')[-1].split('.')[0])
 if opt.netG != '':
   # netG.load_state_dict(torch.load(opt.netG))
   netG.load_state_dict(torch.load(opt.netG), strict=False)
-print(netG)
+# print(netG)
 
 
 
