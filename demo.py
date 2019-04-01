@@ -4,6 +4,7 @@ import os
 import sys
 import random
 import torch
+import pandas as pd
 import torch.nn as nn
 import torch.nn.parallel
 import torch.backends.cudnn as cudnn
@@ -29,7 +30,7 @@ import torchvision.utils as vutils
 from torch.autograd import Variable
 from misc import *
 import dehaze22  as net
-
+from scipy import ndimage, misc
 
 import pdb
 import torchvision.models as models
@@ -45,6 +46,8 @@ parser.add_argument('--dataroot', required=False,
   default='', help='path to trn dataset')
 parser.add_argument('--valDataroot', required=False,
   default='', help='path to val dataset')
+parser.add_argument('--saveDataroot', required=False,
+  default='', help='path to save dataset')
 parser.add_argument('--mode', type=str, default='B2A', help='B2A: facade, A2B: edges2shoes')
 parser.add_argument('--batchSize', type=int, default=1, help='input batch size')
 parser.add_argument('--valBatchSize', type=int, default=1, help='input batch size')
@@ -127,11 +130,14 @@ outputChannelSize= opt.outputChannelSize
 
 netG = net.dehaze(inputChannelSize, outputChannelSize, ngf)
 
-
+index_txt = os.path.join(opt.valDataroot, 'index.csv')
+index_list = pd.read_csv(index_txt, sep=',', header=None)
+print(index_list.iloc[0][0].split('/')[-1].split('.')[0])
 
 
 if opt.netG != '':
-  netG.load_state_dict(torch.load(opt.netG))
+  # netG.load_state_dict(torch.load(opt.netG))
+  netG.load_state_dict(torch.load(opt.netG), strict=False)
 print(netG)
 
 
@@ -226,7 +232,7 @@ for epoch in range(1):
     depth.data.resize_as_(depth_cpu).copy_(depth_cpu)
     ato.data.resize_as_(ato_cpu).copy_(ato_cpu)
     #
-
+    print(input.shape)
 
     x_hat, tran_hat, atp_hat, dehaze2= netG(input)
 
@@ -235,7 +241,7 @@ for epoch in range(1):
     iteration=iteration+1
 
     index2 = 0
-    directory='./result_cvpr18/image/real_dehazed/'
+    directory=opt.saveDataroot
     if not os.path.exists(directory):
         os.makedirs(directory)
     for i in range(opt.valBatchSize):
@@ -243,5 +249,8 @@ for epoch in range(1):
         print(index)
         zz1=zz[index2,:,:,:]
 
-        vutils.save_image(zz1, './result_cvpr18/image/real_dehazed/'+str(index-1)+'_DCPCN.png', normalize=True, scale_each=False)
+        zz1 = misc.imresize(zz1,[index_list.iloc[index-1][1],index_list.iloc[index-1][2]]).astype(float)
+        print(zz1.shape)
+        # vutils.save_image(zz1, os.path.join(directory, index_list.iloc[index-1][0].split('/')[-1].split('.')[0]+'.png'), normalize=True, scale_each=False)
+        misc.imsave(os.path.join(directory, index_list.iloc[index-1][0].split('/')[-1].split('.')[0]+'.png'), zz1)
 trainLogger.close()
