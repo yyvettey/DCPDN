@@ -108,7 +108,7 @@ valDataloader = getLoader(opt.dataset,
                           opt.valBatchSize,
                           opt.workers,
                           mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5),
-                          split='Train',
+                          split='val',
                           shuffle=False,
                           seed=opt.manualSeed)
 
@@ -220,17 +220,18 @@ for epoch in range(1):
     t0 = time.time()
 
     if opt.mode == 'B2A':
-        input_cpu, target_cpu, depth_cpu, ato_cpu = data
+        input_cpu, _, _, _ = data
     elif opt.mode == 'A2B' :
-        input_cpu, target_cpu, depth_cpu, ato_cpu = data
-    batch_size = target_cpu.size(0)
+        input_cpu, _, _, _ = data
+    batch_size = input_cpu.size(0)
     # print(i)
-    target_cpu, input_cpu, depth_cpu, ato_cpu = target_cpu.float().cuda(), input_cpu.float().cuda(), depth_cpu.float().cuda(), ato_cpu.float().cuda()
+    # target_cpu, input_cpu, depth_cpu, ato_cpu = target_cpu.float().cuda(), input_cpu.float().cuda(), depth_cpu.float().cuda(), ato_cpu.float().cuda()
+    input_cpu = input_cpu.float().cuda()
     # get paired data
-    target.data.resize_as_(target_cpu).copy_(target_cpu)
+    # target.data.resize_as_(target_cpu).copy_(target_cpu)
     input.data.resize_as_(input_cpu).copy_(input_cpu)
-    depth.data.resize_as_(depth_cpu).copy_(depth_cpu)
-    ato.data.resize_as_(ato_cpu).copy_(ato_cpu)
+    # depth.data.resize_as_(depth_cpu).copy_(depth_cpu)
+    # ato.data.resize_as_(ato_cpu).copy_(ato_cpu)
     #
     print(input.shape)
 

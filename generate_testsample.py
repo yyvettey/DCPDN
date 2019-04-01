@@ -72,8 +72,8 @@ def array2PIL(arr, size):
     return Image.frombuffer(mode, size, arr.tostring(), 'raw', mode, 0, 1)
 
 
-input_path = '/ssd2/yeyuan/dehaze/DCPDN/facades/testimgs/'
-output_path = '/ssd2/yeyuan/dehaze/DCPDN/facades/testimgs_h5/'
+input_path = '/ssd2/yeyuan/dehaze/RTTS/JPEGImages/'
+output_path = '/ssd2/yeyuan/dehaze/RTTS/JPEGImages_h5/'
 index_txt = os.path.join(output_path, 'index.csv')
 
 index=1
@@ -131,9 +131,9 @@ for item in train_list_per:
     h5f=h5py.File(output_path+str(total_num)+'.h5','w')
 
     h5f.create_dataset('haze',data=haze_image)
-    h5f.create_dataset('trans',data=gt_img)
-    h5f.create_dataset('ato',data=gt_img)
-    h5f.create_dataset('gt',data=gt_img)
+    h5f.create_dataset('trans',data=np.array([]))
+    h5f.create_dataset('ato',data=np.array([]))
+    h5f.create_dataset('gt',data=np.array([]))
 
     # print img.max()
     # print img.min()

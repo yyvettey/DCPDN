@@ -31,7 +31,7 @@ def default_loader(path):
   return Image.open(path).convert('RGB')
 
 class pix2pix_val(data.Dataset):
-  def __init__(self, root, transform=None, loader=default_loader, seed=None):
+  def __init__(self, root, transform=None, loader=default_loader, seed=None, hazeOnly=True):
     # imgs = make_dataset(root)
     # if len(imgs) == 0:
     #   raise(RuntimeError("Found 0 images in subfolders of: " + root + "\n"
@@ -41,6 +41,8 @@ class pix2pix_val(data.Dataset):
     self.transform = transform
     self.loader = loader
     # self.sampler = SequentialSampler(dataset)
+
+    self.hazeOnly = hazeOnly
 
     if seed is not None:
       np.random.seed(seed)
@@ -60,23 +62,29 @@ class pix2pix_val(data.Dataset):
     file_name=self.root+'/'+str(index)+'.h5'
     f=h5py.File(file_name,'r')
     haze_image=f['haze'][:]
-    trans_map=f['trans'][:]
-    ato_map=f['ato'][:]
-    GT=f['gt'][:]
+    if not self.hazeOnly:
+      trans_map=f['trans'][:]
+      ato_map=f['ato'][:]
+      GT=f['gt'][:]
 
 
 
     haze_image=np.swapaxes(haze_image,0,2)
-    trans_map=np.swapaxes(trans_map,0,2)
-    ato_map=np.swapaxes(ato_map,0,2)
-    GT=np.swapaxes(GT,0,2)
+    if not self.hazeOnly:
+      trans_map=np.swapaxes(trans_map,0,2)
+      ato_map=np.swapaxes(ato_map,0,2)
+      GT=np.swapaxes(GT,0,2)
 
 
 
     haze_image=np.swapaxes(haze_image,1,2)
-    trans_map=np.swapaxes(trans_map,1,2)
-    ato_map=np.swapaxes(ato_map,1,2)
-    GT=np.swapaxes(GT,1,2)
+    if not self.hazeOnly:
+      trans_map=np.swapaxes(trans_map,1,2)
+      ato_map=np.swapaxes(ato_map,1,2)
+      GT=np.swapaxes(GT,1,2)
+
+    if self.hazeOnly:
+      GT, trans_map, ato_map = haze_image, haze_image, haze_image
 
     # if np.random.uniform()>0.5:
     #   haze_image=np.flip(haze_image,2).copy()
